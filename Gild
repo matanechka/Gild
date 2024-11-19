@@ -1,0 +1,69 @@
+// fillTable.js
+// Скрипт для автоматичного заповнення таблиці з даними про вкладників та вартістю місць
+
+// Масив з вартістю місць
+const multipliedValues = [5801, 2906, 965, 238, 48];
+
+// Масиви з ID вкладників та їхніми вкладами
+const patronIdArray = ["227499", "4012062", "5432056", "1982463", "9773882"];
+const investArray = [1000, 300, 300, 200, 100];
+
+/**
+ * Функція для отримання логіна вкладника за його ID
+ * @param {string} patronId - ID вкладника
+ * @returns {Promise<string>} - Логін вкладника
+ */
+async function getLoginById(patronId) {
+  // Заміни цей об'єкт на реальний запит до твоєї бази даних
+  const mockLogins = {
+    "227499": "User1",
+    "4012062": "User2",
+    "5432056": "User3",
+    "1982463": "User4",
+    "9773882": "User5"
+  };
+  return mockLogins[patronId] || "Unknown";
+}
+
+/**
+ * Основна функція для заповнення таблиці
+ * @returns {Promise<Array<Object>>} - Заповнена таблиця
+ */
+async function fillTable() {
+  let table = []; // Масив для збереження заповнених даних
+
+  for (let i = 0; i < multipliedValues.length; i++) {
+    let cost = multipliedValues[i]; // Вартість місця
+    let investor = { id: null, login: null, investment: 0 };
+
+    for (let j = 0; j < investArray.length; j++) {
+      if (investArray[j] >= cost) {
+        // Знайшли вкладника, який може зайняти це місце
+        investor.id = patronIdArray[j];
+        investor.login = await getLoginById(patronIdArray[j]);
+        investor.investment = investArray[j];
+
+        // Видаляємо використаного вкладника, щоб він не займав наступне місце
+        patronIdArray.splice(j, 1);
+        investArray.splice(j, 1);
+        break;
+      }
+    }
+
+    table.push({
+      placeCost: cost,
+      patronId: investor.id,
+      login: investor.login,
+      investment: investor.investment
+    });
+  }
+
+  console.log("Заповнена таблиця:", table);
+  return table;
+}
+
+// Виклик функції
+fillTable().then(filledTable => {
+  // Додатковий вивід у консоль
+  console.log(filledTable);
+});
